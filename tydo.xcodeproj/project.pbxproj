@@ -1,0 +1,451 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A4CE41BD1BA8042A5D3A6A8 /* tydoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDC91C56C638D75C1115EFC8 /* tydoApp.swift */; };
+		2AEFB418119A6B54F0C74D43 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A8AD2EDD0620B19723C59659 /* KeyboardShortcuts */; };
+		3ACF484BAEE2F0C64D8DD707 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABCA9BCB8D4BCC9D00ED0F3 /* AppDelegate.swift */; };
+		4427431FE57ABF8FF91ECA1E /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78481E9E6EDEC5414A2B1F47 /* LLMService.swift */; };
+		52F15B8AEA225C15D6BD4133 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F8A0A33AE06D4C9CCA15A01 /* Models.swift */; };
+		627AB994913134B56CFBD859 /* OptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A9CBE4AF2EF26FACDEB172 /* OptionsView.swift */; };
+		710FAD6C6374B2BAC4747474 /* WindowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703D56CA7F80755BA60B11AF /* WindowManager.swift */; };
+		76177BF508BC69F3C76F3553 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0DDA48E814AC10E46E8F14 /* SettingsStore.swift */; };
+		79A99F6A09282BD9C3D2ACF4 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37FE7C37D9F144C52D8F9EE6 /* ListView.swift */; };
+		8820D5E12FF2BE6100DB73FC /* OrganizerPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8820D5DF2FF2BE6100DB73FC /* OrganizerPrompts.swift */; };
+		8820D5E22FF2BE6100DB73FC /* OrganizerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8820D5E02FF2BE6100DB73FC /* OrganizerService.swift */; };
+		A9456713C43EBE550DCEB102 /* Shortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE6F5DFE1D0623C547578FE2 /* Shortcuts.swift */; };
+		AAAA0001AAAA0001AAAA0001 /* PipelineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA0002AAAA0002AAAA0002 /* PipelineService.swift */; };
+		AAAA0003AAAA0003AAAA0003 /* PipelinePrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA0004AAAA0004AAAA0004 /* PipelinePrompts.swift */; };
+		CBEB0FCFC775238E820D262E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466A0A8BFA9FF9732ABD2BE4 /* FloatingPanel.swift */; };
+		D50B6A05A7901EE85B9D0372 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A989DAF8E113A67E5B96C7 /* CaptureView.swift */; };
+		EDDAEFEC81F8A54D99CE0900 /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0E31DC94998F9787E4F90E /* TodoRepository.swift */; };
+		F00DCAFE00000000000000A2 /* ProcessingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DCAFE00000000000000A1 /* ProcessingCoordinator.swift */; };
+		F00DCAFE00000000000000B2 /* MaintenanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DCAFE00000000000000B1 /* MaintenanceService.swift */; };
+		687993B06921482D8C7315C0 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48FC7115B81C4192990145DB /* KeychainStore.swift */; };
+		CFF37E7273BA4E7AA18D940D /* MastermindPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6158E47AB8054A48A2BBA34D /* MastermindPrompts.swift */; };
+		BAEB6B569B69422C858BD204 /* MastermindService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6893E5B9BEB4363AF6865C3 /* MastermindService.swift */; };
+		894BB943BCE2483B8DB2A13E /* MastermindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA721CE490B4571891FC21C /* MastermindView.swift */; };
+		1A621FB8A01846628BDBA967 /* DocumentPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B98570E64C40289EFD8D80 /* DocumentPrompts.swift */; };
+		F663CA7586CA4D12AA95157D /* DocumentImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F45480E18E9C4337BCE41E57 /* DocumentImportService.swift */; };
+		274350A9111E4859AF915F01 /* DocumentReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420EB712D4914AA9B23BAACC /* DocumentReviewView.swift */; };
+		C1A00001C1A00001C1A00001 /* TydoCLIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A00002C1A00002C1A00002 /* TydoCLIClient.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		067AF416644F526E407AADCB /* tydo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = tydo.entitlements; sourceTree = "<group>"; };
+		19A989DAF8E113A67E5B96C7 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
+		37FE7C37D9F144C52D8F9EE6 /* ListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
+		466A0A8BFA9FF9732ABD2BE4 /* FloatingPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanel.swift; sourceTree = "<group>"; };
+		4C0DDA48E814AC10E46E8F14 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		4F8A0A33AE06D4C9CCA15A01 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		6CE4A497797333292F177F9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		703D56CA7F80755BA60B11AF /* WindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowManager.swift; sourceTree = "<group>"; };
+		78481E9E6EDEC5414A2B1F47 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		7F6D01D6546BCD07518D8398 /* tydo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tydo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8820D5DF2FF2BE6100DB73FC /* OrganizerPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizerPrompts.swift; sourceTree = "<group>"; };
+		8820D5E02FF2BE6100DB73FC /* OrganizerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrganizerService.swift; sourceTree = "<group>"; };
+		8ABCA9BCB8D4BCC9D00ED0F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		AAAA0002AAAA0002AAAA0002 /* PipelineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineService.swift; sourceTree = "<group>"; };
+		AAAA0004AAAA0004AAAA0004 /* PipelinePrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelinePrompts.swift; sourceTree = "<group>"; };
+		B5A9CBE4AF2EF26FACDEB172 /* OptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionsView.swift; sourceTree = "<group>"; };
+		BDC91C56C638D75C1115EFC8 /* tydoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tydoApp.swift; sourceTree = "<group>"; };
+		EE0E31DC94998F9787E4F90E /* TodoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoRepository.swift; sourceTree = "<group>"; };
+		F00DCAFE00000000000000A1 /* ProcessingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingCoordinator.swift; sourceTree = "<group>"; };
+		F00DCAFE00000000000000B1 /* MaintenanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaintenanceService.swift; sourceTree = "<group>"; };
+		EE6F5DFE1D0623C547578FE2 /* Shortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shortcuts.swift; sourceTree = "<group>"; };
+		48FC7115B81C4192990145DB /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		6158E47AB8054A48A2BBA34D /* MastermindPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastermindPrompts.swift; sourceTree = "<group>"; };
+		B6893E5B9BEB4363AF6865C3 /* MastermindService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastermindService.swift; sourceTree = "<group>"; };
+		DAA721CE490B4571891FC21C /* MastermindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MastermindView.swift; sourceTree = "<group>"; };
+		01B98570E64C40289EFD8D80 /* DocumentPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPrompts.swift; sourceTree = "<group>"; };
+		F45480E18E9C4337BCE41E57 /* DocumentImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentImportService.swift; sourceTree = "<group>"; };
+		420EB712D4914AA9B23BAACC /* DocumentReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentReviewView.swift; sourceTree = "<group>"; };
+		C1A00002C1A00002C1A00002 /* TydoCLIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TydoCLIClient.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3806DEFC96CD30D22C0E71FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AEFB418119A6B54F0C74D43 /* KeyboardShortcuts in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		12C937E96CA0E9AA5FBC62ED /* List */ = {
+			isa = PBXGroup;
+			children = (
+				37FE7C37D9F144C52D8F9EE6 /* ListView.swift */,
+			);
+			path = List;
+			sourceTree = "<group>";
+		};
+		2B731CEFC6751AAE0EC69B98 = {
+			isa = PBXGroup;
+			children = (
+				DE3F8DC73C1CDE5B1C9895AC /* tydo */,
+				6CE4A497797333292F177F9E /* Info.plist */,
+				067AF416644F526E407AADCB /* tydo.entitlements */,
+				EC148643C97903A61FBA5521 /* Frameworks */,
+				86024CAD1E83101D97359D73 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		46B8693A1D1C75AB9611EEF8 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				19A989DAF8E113A67E5B96C7 /* CaptureView.swift */,
+				420EB712D4914AA9B23BAACC /* DocumentReviewView.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		609874F33224C0C09F1FEE42 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8820D5DF2FF2BE6100DB73FC /* OrganizerPrompts.swift */,
+				8820D5E02FF2BE6100DB73FC /* OrganizerService.swift */,
+				78481E9E6EDEC5414A2B1F47 /* LLMService.swift */,
+				AAAA0002AAAA0002AAAA0002 /* PipelineService.swift */,
+				AAAA0004AAAA0004AAAA0004 /* PipelinePrompts.swift */,
+				4C0DDA48E814AC10E46E8F14 /* SettingsStore.swift */,
+				EE0E31DC94998F9787E4F90E /* TodoRepository.swift */,
+				F00DCAFE00000000000000A1 /* ProcessingCoordinator.swift */,
+				F00DCAFE00000000000000B1 /* MaintenanceService.swift */,
+				48FC7115B81C4192990145DB /* KeychainStore.swift */,
+				6158E47AB8054A48A2BBA34D /* MastermindPrompts.swift */,
+				B6893E5B9BEB4363AF6865C3 /* MastermindService.swift */,
+				01B98570E64C40289EFD8D80 /* DocumentPrompts.swift */,
+				F45480E18E9C4337BCE41E57 /* DocumentImportService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		60E9FE93B4DC7F501074EF05 /* Hotkeys */ = {
+			isa = PBXGroup;
+			children = (
+				EE6F5DFE1D0623C547578FE2 /* Shortcuts.swift */,
+			);
+			path = Hotkeys;
+			sourceTree = "<group>";
+		};
+		86024CAD1E83101D97359D73 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7F6D01D6546BCD07518D8398 /* tydo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9CA5BE748BEFEC821D0CDBFB /* Options */ = {
+			isa = PBXGroup;
+			children = (
+				B5A9CBE4AF2EF26FACDEB172 /* OptionsView.swift */,
+				DAA721CE490B4571891FC21C /* MastermindView.swift */,
+			);
+			path = Options;
+			sourceTree = "<group>";
+		};
+		A1C86A29E589D48EC70B6A32 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4F8A0A33AE06D4C9CCA15A01 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D1D0524B025E57AFFF263442 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				8ABCA9BCB8D4BCC9D00ED0F3 /* AppDelegate.swift */,
+				C1A00002C1A00002C1A00002 /* TydoCLIClient.swift */,
+				466A0A8BFA9FF9732ABD2BE4 /* FloatingPanel.swift */,
+				703D56CA7F80755BA60B11AF /* WindowManager.swift */,
+				BDC91C56C638D75C1115EFC8 /* tydoApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		DE3F8DC73C1CDE5B1C9895AC /* tydo */ = {
+			isa = PBXGroup;
+			children = (
+				D1D0524B025E57AFFF263442 /* App */,
+				46B8693A1D1C75AB9611EEF8 /* Capture */,
+				60E9FE93B4DC7F501074EF05 /* Hotkeys */,
+				12C937E96CA0E9AA5FBC62ED /* List */,
+				A1C86A29E589D48EC70B6A32 /* Models */,
+				9CA5BE748BEFEC821D0CDBFB /* Options */,
+				609874F33224C0C09F1FEE42 /* Services */,
+			);
+			path = tydo;
+			sourceTree = "<group>";
+		};
+		EC148643C97903A61FBA5521 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* tydo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5D7CF4D6E17A5B96DECF65AF /* Build configuration list for PBXNativeTarget "tydo" */;
+			buildPhases = (
+				DBAEDAAE674BE07D23447E75 /* Sources */,
+				3806DEFC96CD30D22C0E71FE /* Frameworks */,
+				B098093DFB498EF325D85EDF /* Resources */,
+				C1A00003C1A00003C1A00003 /* Embed tydo CLI */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = tydo;
+			packageProductDependencies = (
+				A8AD2EDD0620B19723C59659 /* KeyboardShortcuts */,
+			);
+			productName = tydo;
+			productReference = 7F6D01D6546BCD07518D8398 /* tydo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = D2F064B28CB35C337D4CFFB6 /* Build configuration list for PBXProject "tydo" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 2B731CEFC6751AAE0EC69B98;
+			packageReferences = (
+				3982ACAF7A6ACEA88A989733 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
+			productRefGroup = 86024CAD1E83101D97359D73 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* tydo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B098093DFB498EF325D85EDF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C1A00003C1A00003C1A00003 /* Embed tydo CLI */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed tydo CLI";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nconfiguration=debug\nif [ \"$CONFIGURATION\" = \"Release\" ]; then configuration=release; fi\n/usr/bin/xcrun swift build --package-path \"$SRCROOT\" -c \"$configuration\" --product tydo\ndestination=\"$TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/Helpers/tydo\"\n/bin/mkdir -p \"$(/usr/bin/dirname \"$destination\")\"\n/bin/cp \"$SRCROOT/.build/$configuration/tydo\" \"$destination\"\n/bin/chmod +x \"$destination\"\nidentity=\"$EXPANDED_CODE_SIGN_IDENTITY\"\nif [ -z \"$identity\" ]; then identity=\"-\"; fi\n/usr/bin/codesign --force --sign \"$identity\" \"$destination\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DBAEDAAE674BE07D23447E75 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3ACF484BAEE2F0C64D8DD707 /* AppDelegate.swift in Sources */,
+				C1A00001C1A00001C1A00001 /* TydoCLIClient.swift in Sources */,
+				CBEB0FCFC775238E820D262E /* FloatingPanel.swift in Sources */,
+				710FAD6C6374B2BAC4747474 /* WindowManager.swift in Sources */,
+				1A4CE41BD1BA8042A5D3A6A8 /* tydoApp.swift in Sources */,
+				D50B6A05A7901EE85B9D0372 /* CaptureView.swift in Sources */,
+				A9456713C43EBE550DCEB102 /* Shortcuts.swift in Sources */,
+				79A99F6A09282BD9C3D2ACF4 /* ListView.swift in Sources */,
+				627AB994913134B56CFBD859 /* OptionsView.swift in Sources */,
+				894BB943BCE2483B8DB2A13E /* MastermindView.swift in Sources */,
+				274350A9111E4859AF915F01 /* DocumentReviewView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		311F378CF4B1FBC07A3FFB46 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = tydo.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = it.clait.tydo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		567A887258EFB128D2B7B662 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		EA3A3A0F81F745597E3134C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = tydo.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = it.clait.tydo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		F6E13E434D454266E90D8854 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5D7CF4D6E17A5B96DECF65AF /* Build configuration list for PBXNativeTarget "tydo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				311F378CF4B1FBC07A3FFB46 /* Debug */,
+				EA3A3A0F81F745597E3134C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D2F064B28CB35C337D4CFFB6 /* Build configuration list for PBXProject "tydo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				567A887258EFB128D2B7B662 /* Debug */,
+				F6E13E434D454266E90D8854 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3982ACAF7A6ACEA88A989733 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A8AD2EDD0620B19723C59659 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3982ACAF7A6ACEA88A989733 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

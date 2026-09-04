@@ -1,0 +1,9 @@
+.build/
+build/
+DerivedData/
+node_modules/
+.DS_Store
+.codegraph/
+*.xcuserstate
+xcuserdata/
+dist/
