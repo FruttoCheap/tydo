@@ -29,11 +29,51 @@ final class TydoCLITests: XCTestCase {
         try? FileManager.default.removeItem(at: directory)
     }
 
+    /// The three provider slots and the guard that keeps API keys out of argv.
+    func testProviderSlotsAndDoctor() throws {
+        let initial = try data(run("config", "get"))
+        XCTAssertEqual(initial["embeddingBaseURL"] as? String, "", "empty means 'same server as chat'")
+        XCTAssertEqual(initial["chatAPIKeyConfigured"] as? Bool, false)
+        XCTAssertEqual(initial["embeddingAPIKeyConfigured"] as? Bool, false)
+
+        // Keys are Keychain-only and stdin-only: argv would leak them to `ps`.
+        for key in ["chat-api-key", "embedding-api-key", "reasoning-api-key"] {
+            let rejected = try run("config", "set", key, "sk-secret")
+            XCTAssertNotEqual(rejected.status, 0, "\(key) must not be settable as an argument")
+            XCTAssertEqual(try rejected.error["code"] as? String, "invalid_request")
+        }
+
+        // Chat hosted, embeddings still local — the combination OpenRouter forces.
+        let updated = try data(run("config", "update", stdin: """
+        {"baseURL":"https://openrouter.ai/api/v1","embeddingBaseURL":"http://localhost:11434/v1","chatAPIKey":"sk-test"}
+        """))
+        XCTAssertEqual(updated["baseURL"] as? String, "https://openrouter.ai/api/v1")
+        XCTAssertEqual(updated["embeddingBaseURL"] as? String, "http://localhost:11434/v1")
+        XCTAssertEqual(updated["chatAPIKeyConfigured"] as? Bool, true)
+
+        // An explicit "" sends embeddings back to the chat server.
+        let cleared = try data(run("config", "update", stdin: #"{"embeddingBaseURL":""}"#))
+        XCTAssertEqual(cleared["embeddingBaseURL"] as? String, "")
+
+        // Back to localhost so doctor fails on a refused connection instead of
+        // making a real call to openrouter.ai from the test suite.
+        _ = try run("config", "update", stdin: #"{"baseURL":"http://localhost:11434/v1","chatAPIKey":null}"#)
+
+        // doctor reports failures as data, so the command itself still succeeds
+        // even with no provider running.
+        let doctor = try run("doctor")
+        XCTAssertEqual(doctor.status, 0, "doctor must not exit non-zero on failed checks")
+        let report = try data(doctor)
+        let names = Set((report["checks"] as? [[String: Any]] ?? []).compactMap { $0["name"] as? String })
+        XCTAssertEqual(names, ["store", "chat", "embedding", "reasoning"])
+        XCTAssertNotNil(report["ok"] as? Bool)
+    }
+
     func testVersionSnapshotAndCodedErrors() throws {
         let version = try run("version")
         XCTAssertEqual(version.status, 0)
         let versionData = try data(version)
-        XCTAssertEqual(versionData["cli"] as? String, "1.1.0")
+        XCTAssertEqual(versionData["cli"] as? String, "1.2.0")
         XCTAssertEqual(versionData["protocolVersion"] as? Int, 1)
 
         let trailing = try run("version", "extra")

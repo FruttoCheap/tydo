@@ -14,7 +14,7 @@ struct ProviderConfig: Sendable {
     static let ollama = ProviderConfig(
         baseURL: URL(string: "http://localhost:11434/v1")!,
         apiKey: "ollama", // required by the OpenAI shape, ignored by Ollama
-        chatModel: "gemma4:31b-cloud",          // any chat model you've `ollama pull`-ed
+        chatModel: "llama3.2",             // any chat model you have `ollama pull`-ed
         embeddingModel: "nomic-embed-text" // 768-dim; swap for bge-m3 / qwen3-embedding for stronger multilingual (e.g. Italian)
     )
 }

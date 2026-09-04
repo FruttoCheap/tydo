@@ -17,14 +17,16 @@ actor PipelineService: ModelActor {
     nonisolated let modelExecutor: any ModelExecutor
 
     private let llm: LLMService
+    private let embeddingLLM: LLMService
     private var isRunning = false
     private var rerunRequested = false
 
-    init(modelContainer: ModelContainer, llm: LLMService) {
+    init(modelContainer: ModelContainer, llm: LLMService, embeddingLLM: LLMService) {
         self.modelContainer = modelContainer
         let context = ModelContext(modelContainer)
         self.modelExecutor = DefaultSerialModelExecutor(modelContext: context)
         self.llm = llm
+        self.embeddingLLM = embeddingLLM
     }
 
     /// Process every todo that still needs work, oldest first.
@@ -90,7 +92,7 @@ actor PipelineService: ModelActor {
         if todo.stage == .enriched, todo.embedding == nil {
             var text = todo.title
             if let body = todo.body, !body.isEmpty { text += "\n" + body }
-            todo.embedding = try await llm.embed(text)
+            todo.embedding = try await embeddingLLM.embed(text)
             if todo.group != nil { todo.stage = .grouped }
             try modelContext.save()
         }

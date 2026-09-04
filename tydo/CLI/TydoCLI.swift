@@ -16,7 +16,7 @@ private struct ErrorEnvelope: Encodable {
 }
 
 private struct VersionOutput: Encodable {
-    let cli = "1.1.0"
+    let cli = "1.2.0"
     let protocolVersion = cliProtocolVersion
 }
 
@@ -111,8 +111,12 @@ private struct ConfigOutput: Encodable {
     let baseURL: String
     let chatModel: String
     let embeddingModel: String
+    /// Empty means embeddings go to the same server as chat.
+    let embeddingBaseURL: String
     let reasoningBaseURL: String
     let reasoningChatModel: String
+    let chatAPIKeyConfigured: Bool
+    let embeddingAPIKeyConfigured: Bool
     let reasoningAPIKeyConfigured: Bool
     let retentionDays: Int
 
@@ -120,11 +124,27 @@ private struct ConfigOutput: Encodable {
         baseURL = settings.baseURL
         chatModel = settings.chatModel
         embeddingModel = settings.embeddingModel
+        embeddingBaseURL = settings.embeddingBaseURL
         reasoningBaseURL = settings.reasoningBaseURL
         reasoningChatModel = settings.reasoningChatModel
-        reasoningAPIKeyConfigured = try settings.hasReasoningAPIKey()
+        chatAPIKeyConfigured = try settings.hasAPIKey(.chat)
+        embeddingAPIKeyConfigured = try settings.hasAPIKey(.embedding)
+        reasoningAPIKeyConfigured = try settings.hasAPIKey(.reasoning)
         retentionDays = settings.retentionDays
     }
+}
+
+/// One diagnostic line. `doctor` always succeeds as a command; a failed check
+/// is data, not a CLI error, so clients can render the whole report at once.
+private struct DoctorOutput: Encodable {
+    struct Check: Encodable {
+        let name: String
+        let ok: Bool
+        let detail: String
+        let remedy: String?
+    }
+    let ok: Bool
+    let checks: [Check]
 }
 
 private enum CLIError: LocalizedError {
@@ -179,6 +199,14 @@ private struct TydoCLI {
 
         if command == "document" {
             try await documentCommand(Array(arguments.dropFirst()))
+            return
+        }
+
+        // Outside withStoreLock on purpose: three provider round-trips can take
+        // 90 seconds and must not block every other command meanwhile.
+        if command == "doctor" {
+            guard arguments.count == 1 else { throw CLIError.invalid("Usage: tydo doctor") }
+            try await doctorCommand()
             return
         }
 
@@ -410,7 +438,7 @@ private struct TydoCLI {
         }
         guard arguments.count == 2 else { throw CLIError.invalid("Usage: tydo document extract <path>") }
         let path = arguments.dropFirst().joined(separator: " ")
-        let service = DocumentImportService(llm: LLMService(config: SettingsStore.shared.providerConfig))
+        let service = DocumentImportService(llm: LLMService(config: try SettingsStore.shared.chatProviderConfig()))
         try write(Envelope(data: try await service.extractItems(from: URL(fileURLWithPath: path))))
     }
 
@@ -418,7 +446,7 @@ private struct TydoCLI {
         guard let action = arguments.first else { throw CLIError.invalid("Missing mastermind command.") }
         let values = Array(arguments.dropFirst())
         let settings = SettingsStore.shared
-        let embeddingLLM = LLMService(config: settings.providerConfig)
+        let embeddingLLM = LLMService(config: try settings.embeddingProviderConfig())
         let service = MastermindService(
             modelContainer: container,
             reasoningLLM: LLMService(config: try settings.reasoningProviderConfig()),
@@ -456,7 +484,9 @@ private struct TydoCLI {
                   let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
                 throw CLIError.invalid("Expected one JSON object on stdin.")
             }
-            let allowed = Set(["version", "baseURL", "chatModel", "embeddingModel", "reasoningBaseURL", "reasoningChatModel", "reasoningAPIKey", "retentionDays"])
+            let allowed = Set(["version", "baseURL", "chatModel", "embeddingModel", "embeddingBaseURL",
+                               "reasoningBaseURL", "reasoningChatModel",
+                               "chatAPIKey", "embeddingAPIKey", "reasoningAPIKey", "retentionDays"])
             guard Set(object.keys).isSubset(of: allowed) else { throw CLIError.invalid("Config update contains an unknown field.") }
             if let version = object["version"] {
                 guard (version as? NSNumber)?.intValue == cliProtocolVersion else {
@@ -481,12 +511,22 @@ private struct TydoCLI {
             let embeddingModel = try string("embeddingModel")
             let reasoningBaseURL = try string("reasoningBaseURL", url: true)
             let reasoningChatModel = try string("reasoningChatModel")
-            var keyUpdate: String??
-            if let value = object["reasoningAPIKey"] {
-                if value is NSNull { keyUpdate = .some(nil) }
-                else if let value = value as? String, !value.isEmpty { keyUpdate = .some(value) }
-                else { throw CLIError.invalid("reasoningAPIKey must be non-empty or null.") }
+            // "" is meaningful here: it sends embeddings back to the chat server.
+            var embeddingBaseURL: String?
+            if let value = object["embeddingBaseURL"] {
+                if let value = value as? String, value.isEmpty { embeddingBaseURL = "" }
+                else { embeddingBaseURL = try string("embeddingBaseURL", url: true) }
             }
+            // Outer nil = field absent, inner nil = explicit null, meaning "clear it".
+            func keyUpdate(_ field: String) throws -> String?? {
+                guard let value = object[field] else { return nil }
+                if value is NSNull { return .some(nil) }
+                if let value = value as? String, !value.isEmpty { return .some(value) }
+                throw CLIError.invalid("\(field) must be non-empty or null.")
+            }
+            let chatKey = try keyUpdate("chatAPIKey")
+            let embeddingKey = try keyUpdate("embeddingAPIKey")
+            let reasoningKey = try keyUpdate("reasoningAPIKey")
             var retentionDays: Int?
             if let value = object["retentionDays"] {
                 guard let number = value as? NSNumber, CFGetTypeID(number) != CFBooleanGetTypeID(),
@@ -497,10 +537,13 @@ private struct TydoCLI {
             }
 
             // Keychain is the only throwing write; perform it before infallible defaults updates.
-            if let keyUpdate { try settings.setReasoningAPIKey(keyUpdate) }
+            if let chatKey { try settings.setAPIKey(chatKey, for: .chat) }
+            if let embeddingKey { try settings.setAPIKey(embeddingKey, for: .embedding) }
+            if let reasoningKey { try settings.setAPIKey(reasoningKey, for: .reasoning) }
             if let baseURL { settings.baseURL = baseURL }
             if let chatModel { settings.chatModel = chatModel }
             if let embeddingModel { settings.embeddingModel = embeddingModel }
+            if let embeddingBaseURL { settings.embeddingBaseURL = embeddingBaseURL }
             if let reasoningBaseURL { settings.reasoningBaseURL = reasoningBaseURL }
             if let reasoningChatModel { settings.reasoningChatModel = reasoningChatModel }
             if let retentionDays { settings.retentionDays = retentionDays }
@@ -513,11 +556,12 @@ private struct TydoCLI {
             case "base-url": settings.baseURL = value
             case "chat-model": settings.chatModel = value
             case "embedding-model": settings.embeddingModel = value
+            case "embedding-base-url": settings.embeddingBaseURL = value
             case "reasoning-base-url": settings.reasoningBaseURL = value
             case "reasoning-chat-model": settings.reasoningChatModel = value
-            case "reasoning-api-key":
-                guard !value.isEmpty else { throw CLIError.invalid("reasoning-api-key cannot be empty.") }
-                try settings.setReasoningAPIKey(value)
+            case "chat-api-key", "embedding-api-key", "reasoning-api-key":
+                // Arguments are visible in `ps` and land in shell history.
+                throw CLIError.invalid("Set '\(key)' with 'tydo config update' instead; API keys are read from stdin only.")
             case "retention-days":
                 guard let days = Int(value), (1...365).contains(days) else {
                     throw CLIError.invalid("retention-days must be from 1 through 365.")
@@ -532,12 +576,72 @@ private struct TydoCLI {
         }
     }
 
+    /// Real round-trips against each configured provider. `GET /models` is
+    /// deliberately not used: it lies on some servers and is absent on others,
+    /// while an actual call reports the error the pipeline would hit anyway.
+    private static func doctorCommand() async throws {
+        let settings = SettingsStore.shared
+        var checks: [DoctorOutput.Check] = []
+
+        func check(_ name: String, remedy: String, _ body: () async throws -> String) async {
+            do {
+                checks.append(.init(name: name, ok: true, detail: try await body(), remedy: nil))
+            } catch {
+                checks.append(.init(name: name, ok: false, detail: error.localizedDescription, remedy: remedy))
+            }
+        }
+
+        // The store first: it also tells us the embedding width already on disk.
+        var storedDimensions: Int?
+        await check("store", remedy: "Check permissions on ~/Library/Application Support/Tydo, or set TYDO_DATA_DIR.") {
+            let context = ModelContext(try makeTydoModelContainer())
+            let todos = try context.fetch(FetchDescriptor<Todo>())
+            storedDimensions = todos.compactMap { $0.embedding?.count }.first
+            return "\(todos.count) todo(s), \(try context.fetch(FetchDescriptor<TodoGroup>()).count) group(s)"
+        }
+
+        await check("chat", remedy: "Start the server, or run `ollama pull \(settings.chatModel)`.") {
+            let llm = LLMService(config: try settings.chatProviderConfig())
+            _ = try await llm.chat([ChatMessage(.user, "ping")], temperature: 0)
+            return "\(settings.chatModel) at \(settings.resolvedBaseURL(.chat))"
+        }
+
+        await check("embedding", remedy: "OpenRouter and Groq have no /embeddings; point embedding-base-url at Ollama or LM Studio.") {
+            let llm = LLMService(config: try settings.embeddingProviderConfig())
+            let vector = try await llm.embed("tydo")
+            let where_ = "\(settings.embeddingModel) at \(settings.resolvedBaseURL(.embedding))"
+            // A width change silently zeroes every similarity, so grouping degrades
+            // into "everything lands in General" with no error anywhere.
+            if let stored = storedDimensions, stored != vector.count {
+                throw CLIError.conflict(
+                    "\(where_) returns \(vector.count) dimensions but \(stored) are stored. "
+                    + "Existing todos will stop matching until they are re-embedded.")
+            }
+            return "\(where_), \(vector.count) dimensions"
+        }
+
+        let reasoningIsChat = settings.resolvedBaseURL(.reasoning) == settings.resolvedBaseURL(.chat)
+            && settings.reasoningChatModel == settings.chatModel
+        if reasoningIsChat {
+            checks.append(.init(name: "reasoning", ok: true, detail: "same as chat", remedy: nil))
+        } else {
+            await check("reasoning", remedy: "Check reasoning-base-url, reasoning-chat-model and reasoningAPIKey.") {
+                let llm = LLMService(config: try settings.reasoningProviderConfig())
+                _ = try await llm.chat([ChatMessage(.user, "ping")], temperature: 0)
+                return "\(settings.reasoningChatModel) at \(settings.resolvedBaseURL(.reasoning))"
+            }
+        }
+
+        try write(Envelope(data: DoctorOutput(ok: checks.allSatisfy(\.ok), checks: checks)))
+    }
+
     private static func process(container: ModelContainer) async throws {
         try await withProcessingLock {
             let settings = SettingsStore.shared
-            let llm = LLMService(config: settings.providerConfig)
+            let llm = LLMService(config: try settings.chatProviderConfig())
+            let embeddingLLM = LLMService(config: try settings.embeddingProviderConfig())
             let coordinator = ProcessingCoordinator(
-                pipeline: PipelineService(modelContainer: container, llm: llm),
+                pipeline: PipelineService(modelContainer: container, llm: llm, embeddingLLM: embeddingLLM),
                 organizer: OrganizerService(modelContainer: container, llm: llm)
             )
             let failures = await coordinator.runPending()
@@ -676,7 +780,7 @@ private struct TydoCLI {
     private static func printHelp() throws {
         // ponytail: JSON-only output avoids maintaining separate human and machine renderers.
         let help = """
-        tydo 1.1.0 - local todo CLI (command results are JSON)
+        tydo 1.2.0 - local todo CLI (command results are JSON)
 
         tydo snapshot
         tydo todo add <text> [--process]
@@ -699,10 +803,17 @@ private struct TydoCLI {
         tydo mastermind analyze [group-id]
         tydo mastermind accept '<proposal-json>'
         tydo config get
-        tydo config update                 # JSON object on stdin; secrets must use this
-        tydo config set <base-url|chat-model|embedding-model|reasoning-base-url|reasoning-chat-model|reasoning-api-key|retention-days> <value>
+        tydo config update                 # JSON object on stdin; API keys must use this
+        tydo config set <base-url|chat-model|embedding-model|embedding-base-url|reasoning-base-url|reasoning-chat-model|retention-days> <value>
+        tydo doctor
         tydo maintenance
         tydo version
+
+        Three provider slots: chat, embedding and reasoning. Each takes its own base URL,
+        model and API key, so chat can be hosted while embeddings stay on localhost.
+        An empty embedding-base-url means "same server as chat". Run `tydo doctor` after
+        changing any of them. API keys live in the Keychain and are written only through
+        `tydo config update`, never as an argument.
 
         Store: ~/Library/Application Support/Tydo/default.store
         Set TYDO_DATA_DIR to override the store/config directory for tests and development.
