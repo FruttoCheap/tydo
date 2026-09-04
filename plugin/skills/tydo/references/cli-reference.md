@@ -150,16 +150,36 @@ todos may still have advanced.
 | `tydo config get` | none | config (no secret value) |
 | `tydo config update` | one JSON object on stdin | config |
 | `tydo config set <key> <value…>` | key + value | config |
+| `tydo doctor` | none | `{ok, checks[]}` |
 
-`config update` is the preferred path: it validates, and it keeps secrets out of
-argv. Accepted fields: `version` (must be `1` if present), `baseURL`,
-`chatModel`, `embeddingModel`, `reasoningBaseURL`, `reasoningChatModel`,
-`reasoningAPIKey` (string, or `null` to clear), `retentionDays` (integer 1–365).
-Unknown fields are rejected. URLs must be absolute `http`/`https`.
+`config update` is the preferred path: it validates, and it is the only way to
+write a key. Accepted fields: `version` (must be `1` if present), `baseURL`,
+`chatModel`, `embeddingModel`, `embeddingBaseURL`, `reasoningBaseURL`,
+`reasoningChatModel`, `chatAPIKey` / `embeddingAPIKey` / `reasoningAPIKey`
+(string, or `null` to clear), `retentionDays` (integer 1–365).
+Unknown fields are rejected. URLs must be absolute `http`/`https`, except
+`embeddingBaseURL`, where `""` means "same server as chat".
 
 `config set` keys: `base-url`, `chat-model`, `embedding-model`,
-`reasoning-base-url`, `reasoning-chat-model`, `reasoning-api-key`,
-`retention-days`. It does **not** validate URLs.
+`embedding-base-url`, `reasoning-base-url`, `reasoning-chat-model`,
+`retention-days`. It does **not** validate URLs, and it **rejects** the three
+`*-api-key` names with `invalid_request` — keys are stdin-only.
+
+### doctor
+
+`tydo doctor` makes one real call per provider slot instead of reading
+`GET /models`, which some servers fake and others omit. Checks are `store`,
+`chat`, `embedding` and `reasoning` (the last reports `same as chat` when the
+two configurations match, without a second call).
+
+It **exits 0 even when checks fail** — a failed check is data, so the whole
+report survives one broken slot. Branch on `data.ok`, never on the exit status.
+Each failing check carries a `remedy` string written for the user.
+
+The `embedding` check compares the model's vector width against the width
+already on disk. A mismatch is reported as a failure because nothing else
+detects it: `cosineSimilarity` returns 0 for differing lengths, so grouping
+degrades into "everything lands in General" with no error anywhere.
 
 ### maintenance
 
@@ -217,13 +237,17 @@ API key lives in the keychain (service `it.clait.tydo.reasoning`, account
 | `base-url` / `baseURL` | `http://localhost:11434/v1` |
 | `chat-model` / `chatModel` | provider default (see `config get`) |
 | `embedding-model` / `embeddingModel` | `nomic-embed-text` |
+| `embedding-base-url` / `embeddingBaseURL` | `""`, meaning "same server as chat" |
 | `reasoning-base-url` / `reasoningBaseURL` | same as `baseURL` |
 | `reasoning-chat-model` / `reasoningChatModel` | same as `chatModel` |
-| `reasoning-api-key` / `reasoningAPIKey` | keychain, falls back to `ollama` |
+| `chatAPIKey` / `embeddingAPIKey` / `reasoningAPIKey` | keychain, falls back to `ollama` |
 | `retention-days` / `retentionDays` | `30` |
 
-The primary provider always sends `Authorization: Bearer ollama`; only the
-reasoning provider honours a real key. Calls are plain OpenAI-compatible
+Each of the three slots — chat, embedding, reasoning — carries its own base URL,
+model and Keychain key, so a hosted chat model can run with embeddings still on
+localhost. That combination is mandatory with OpenRouter or Groq, which serve
+chat but expose no `/embeddings` endpoint. When `embeddingBaseURL` is empty the
+embedding slot borrows the chat slot's URL *and* key. Calls are plain OpenAI-compatible
 `POST <baseURL>/chat/completions` and `POST <baseURL>/embeddings`.
 
 ## Environment

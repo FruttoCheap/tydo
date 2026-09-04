@@ -29,12 +29,13 @@ configures (default: local Ollama).
 `tydo` is often not on `PATH`. Resolve it once per session and reuse the path:
 
 ```bash
-command -v tydo || ls "$TYDO_CLI_PATH" ./.build/release/tydo 2>/dev/null | head -1
+command -v tydo || ls "$TYDO_CLI_PATH" /opt/homebrew/bin/tydo /usr/local/bin/tydo \
+  /Applications/Tydo.app/Contents/Helpers/tydo ./.build/release/tydo 2>/dev/null | head -1
 ```
 
-In this repository, build it with `swift build -c release` → `./.build/release/tydo`.
-The macOS app ships it as a private helper inside its bundle
-(`<app>.app/Contents/Helpers/tydo`); there is no installed public path yet.
+`brew install FruttoCheap/tap/tydo` puts it on `PATH`. The macOS app also ships it
+at `Tydo.app/Contents/Helpers/tydo` and offers to symlink that into `/usr/local/bin`.
+In this repository, `swift build -c release` → `./.build/release/tydo`.
 Confirm with `tydo version` (prints `{"data":{"cli":…,"protocolVersion":1}}`).
 If `protocolVersion` is not `1`, re-read `tydo help` before trusting anything below.
 
@@ -121,6 +122,7 @@ Error `code` values: `invalid_request`, `not_found`, `conflict`, `busy`,
 | accept a suggestion | `tydo mastermind accept '<proposal-json>'` |
 | answer a pending grouping question | `tydo clarification list` → `resolve <id> <group-name>` |
 | which model / retention is set | `tydo config get` |
+| "the AI isn't working" / provider check | `tydo doctor` |
 
 Full syntax, flags, and output schemas: **`references/cli-reference.md`**.
 
@@ -157,7 +159,7 @@ Consequences you must not get wrong:
 
 | Class | Commands |
 |---|---|
-| **Read-only** | `version`, `snapshot`, `todo list`, `todo show`, `group list`, `clarification list`, `config get`, `document extract`, `mastermind analyze` |
+| **Read-only** | `version`, `snapshot`, `todo list`, `todo show`, `group list`, `clarification list`, `config get`, `doctor`, `document extract`, `mastermind analyze` |
 | **Local write** | `todo add`/`add-many`/`rename`/`complete`/`reopen`/`move`/`unassign`, `group create`/`rename`, `clarification mark-presented`/`resolve`, `mastermind accept`, `config set`/`update`, `process` |
 | **Destroys data** | `todo delete <id> --yes`, `maintenance` |
 | **Deletes a group (not its todos)** | `group delete <id> --yes` |
@@ -223,8 +225,21 @@ user says are there, the store path is wrong — go back to §1b.
 
 ## 10. Configuration and secrets
 
-`tydo config get` shows the effective settings (it never prints the API key, only
-`reasoningAPIKeyConfigured`).
+`tydo config get` shows the effective settings. It never prints a key, only
+`chatAPIKeyConfigured` / `embeddingAPIKeyConfigured` / `reasoningAPIKeyConfigured`.
+
+There are three independent provider slots — **chat**, **embedding**, **reasoning** —
+each with its own base URL, model and key. An empty `embeddingBaseURL` means
+"same server as chat", which is the default and what a local-only setup wants.
+The slot split exists because OpenRouter and Groq serve chat but have no
+`/embeddings` endpoint: with them, `embeddingBaseURL` must point at a local
+Ollama or LM Studio.
+
+`tydo doctor` is the fastest way to find out what is actually broken. It makes a
+real call per slot rather than trusting `GET /models`, and returns
+`{ok, checks:[{name, ok, detail, remedy}]}`. It **exits 0 even when checks fail** —
+read `data.ok`, not the exit status. Run it before blaming the store for odd
+results, and after any provider change.
 
 To change settings, **prefer `tydo config update` with a JSON object on stdin** —
 it validates URLs and the 1–365 retention range, and applies atomically:
@@ -233,9 +248,13 @@ it validates URLs and the 1–365 retention range, and applies atomically:
 echo '{"version":1,"retentionDays":60}' | tydo config update
 ```
 
-Never pass a secret through `tydo config set reasoning-api-key <value>`: argv is
-visible in shell history and to `ps`. Use `config update` with
-`{"reasoningAPIKey":"…"}`, and `{"reasoningAPIKey":null}` to clear it.
+`config set` **rejects** every API key with `invalid_request`: argv is visible in
+shell history and to `ps`. Use `config update` with `{"chatAPIKey":"…"}`,
+`{"embeddingAPIKey":"…"}` or `{"reasoningAPIKey":"…"}`, and `null` to clear one.
+
+A changed embedding model changes the vector width, which silently zeroes every
+similarity and drops all grouping into General. `tydo doctor` reports that
+mismatch; nothing else does.
 
 `TYDO_DATA_DIR=<dir>` redirects the store, the settings suite, and the keychain
 service all at once. Set it — inline on the single command, e.g.

@@ -175,6 +175,7 @@ async function discoverExecutable() {
     override,
     "/opt/homebrew/bin/tydo",
     "/usr/local/bin/tydo",
+    "/Applications/Tydo.app/Contents/Helpers/tydo",
   ].filter(Boolean) as string[];
   for (const candidate of fixed) {
     try {

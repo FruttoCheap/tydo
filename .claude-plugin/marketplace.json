@@ -1,0 +1,22 @@
+{
+  "name": "tydo",
+  "owner": {
+    "name": "FruttoCheap",
+    "url": "https://github.com/FruttoCheap"
+  },
+  "metadata": {
+    "description": "Tydo — a local-first task manager for macOS, driven by the tydo CLI.",
+    "version": "1.2.0"
+  },
+  "plugins": [
+    {
+      "name": "tydo",
+      "source": "./plugin",
+      "description": "Manage a personal Tydo task list through the local tydo CLI: capture, browse, complete, group, extract action items from documents, and plan next actions. Requires the CLI (brew install FruttoCheap/tap/tydo).",
+      "version": "1.2.0",
+      "author": { "name": "Giulio Desana" },
+      "license": "MIT",
+      "keywords": ["todo", "tasks", "productivity", "macos", "local-first"]
+    }
+  ]
+}

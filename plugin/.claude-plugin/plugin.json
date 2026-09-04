@@ -1,0 +1,10 @@
+{
+  "name": "tydo",
+  "version": "1.2.0",
+  "description": "Manage a personal Tydo task list through the local tydo CLI: capture, browse, complete, group, extract action items from documents, and plan next actions.",
+  "author": { "name": "Giulio Desana" },
+  "homepage": "https://github.com/FruttoCheap/tydo",
+  "repository": "https://github.com/FruttoCheap/tydo",
+  "license": "MIT",
+  "keywords": ["todo", "tasks", "productivity", "macos", "local-first"]
+}
