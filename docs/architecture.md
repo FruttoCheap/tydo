@@ -7,7 +7,7 @@
 > pre-1.1.0 baseline and is retained as historical rationale.
 
 The agreed Raycast architecture, scope, prerequisites, and delivery sequence are
-defined in [`RAYCAST_IMPLEMENTATION_PLAN.md`](RAYCAST_IMPLEMENTATION_PLAN.md).
+defined in [`raycast-implementation-plan.md`](raycast-implementation-plan.md).
 
 Audited against the source and local builds on 2026-09-03. This is the handoff
 document for app, CLI, agent-skill, and Raycast work.
@@ -61,7 +61,7 @@ Primary implementation files:
 
 ## CLI Contract
 
-The current CLI version is `1.0.0`; the protocol version is `1`.
+The current CLI version is `1.2.0`; the protocol version is `1`.
 
 Successful machine commands print one JSON value to stdout:
 
@@ -119,6 +119,7 @@ Exceptions to the JSON contract:
 | `tydo mastermind accept [JSON]` | proposal argument or stdin | created todo |
 | `tydo config get` | none | non-secret configuration |
 | `tydo config set <key> <value>` | key and value | updated configuration |
+| `tydo doctor` | none | per-slot provider and store diagnostics |
 | `tydo maintenance` | none | updated snapshot |
 
 `todo add-many` and `mastermind accept` are the only commands that read JSON
@@ -190,7 +191,7 @@ External clients must currently assume all of the following:
 10. Refresh with `snapshot` after changes made through another interface. The
     app does not observe external store changes.
 
-The CLI has no capability-discovery, schema, health, processing-status, export,
+`tydo doctor` covers health. The CLI still has no capability-discovery, schema, processing-status, export,
 event-history, idempotency, or unassign command.
 
 ## Persistence
@@ -243,29 +244,39 @@ one transaction-wide interprocess lock.
 
 Non-secret settings use the `it.clait.tydo` UserDefaults suite.
 
+There are three independent provider slots — `chat`, `embedding`, `reasoning` —
+each with its own base URL, model and Keychain key.
+
 | CLI key | Stored setting | Default |
 |---|---|---|
-| `base-url` | primary OpenAI-compatible base URL | `http://localhost:11434/v1` |
-| `chat-model` | primary chat model | `gemma4:31b-cloud` |
-| `embedding-model` | primary embedding model | `nomic-embed-text` |
-| `reasoning-base-url` | reasoning base URL | primary URL |
-| `reasoning-chat-model` | reasoning model | primary chat model |
-| `reasoning-api-key` | Keychain secret | `ollama` fallback |
+| `base-url` | chat base URL | `http://localhost:11434/v1` |
+| `chat-model` | chat model | `llama3.2` |
+| `embedding-model` | embedding model | `nomic-embed-text` |
+| `embedding-base-url` | embedding base URL | `""`, meaning "same server as chat" |
+| `reasoning-base-url` | reasoning base URL | chat URL |
+| `reasoning-chat-model` | reasoning model | chat model |
 | `retention-days` | cleanup age | `30` |
 
-The reasoning key is stored in Keychain under service
-`it.clait.tydo.reasoning`, account `reasoning.apiKey`.
+Keys are stored in Keychain under service `it.clait.tydo.reasoning` — the name
+is historical, it now holds all three — with accounts `chat.apiKey`,
+`embedding.apiKey` and `reasoning.apiKey`. Each falls back to the literal
+`ollama`, which local servers ignore.
+
+The slot split exists because OpenRouter and Groq serve chat but expose no
+`/embeddings` endpoint at all. It also allows the useful default of a hosted
+chat model with embeddings still on localhost.
 
 Current constraints:
 
-- The primary provider always sends `Bearer ollama`; hosted primary providers
-  requiring a real key are unsupported.
-- `reasoning-api-key` is passed in process arguments by both shell users and the
-  app, exposing it to shell history and process inspection.
-- There is no key-clear command. The app skips saving an empty key.
-- URL and model validation is weak. Invalid URLs can be stored but silently
-  fall back to the local default when used.
-- The CLI accepts any positive retention value; the app limits it to 1...365.
+- API keys are writable only through `config update` on stdin. `config set`
+  rejects `chat-api-key`, `embedding-api-key` and `reasoning-api-key`, because
+  arguments are visible in `ps` and land in shell history.
+- `config update` validates URLs and the 1...365 retention range; `config set`
+  does not. Invalid URLs stored through `set` silently fall back to the local
+  default when used.
+- Changing the embedding model changes the vector width, which makes
+  `cosineSimilarity` return 0 against every stored embedding and drops all
+  grouping into General. `tydo doctor` is the only thing that reports it.
 
 ## AI Workflows
 
@@ -351,13 +362,12 @@ provider for embeddings. It returns a summary and 2-5 proposed next actions.
 
 ## Maintenance
 
-Maintenance runs immediately at app launch and every six hours. It deletes all
-todos whose `createdAt` is older than `retentionDays`, regardless of whether
-they are completed or active, then prunes groups with no active todos.
+Maintenance runs immediately at app launch and every six hours. It deletes
+**completed** todos whose `completedAt` is older than `retentionDays`, then
+prunes groups with no active todos. Active todos are never deleted by age.
 
-This means the default configuration permanently deletes active tasks after 30
-days. There is no confirmation, trash, undo, backup, or export. Event records
-can still retain deleted task titles, and clarifications are not cleaned up.
+There is no confirmation, trash, undo, backup, or export. Event records can
+still retain deleted task titles, and clarifications are not cleaned up.
 
 ## macOS App
 

@@ -1,6 +1,6 @@
 # Tydo Raycast Implementation Plan
 
-This plan starts from `SYSTEM_OVERVIEW.md` and targets domain parity with the
+This plan starts from `architecture.md` and targets domain parity with the
 macOS UI through a Store-ready Raycast extension. Raycast remains a thin client
 of the `tydo` JSON CLI. It does not access SwiftData, UserDefaults, Keychain, or
 AI providers directly.

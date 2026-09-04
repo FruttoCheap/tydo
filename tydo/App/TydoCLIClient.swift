@@ -45,8 +45,12 @@ struct TydoConfig: Codable, Sendable {
     let baseURL: String
     let chatModel: String
     let embeddingModel: String
+    /// Empty means embeddings go to the same server as chat.
+    let embeddingBaseURL: String
     let reasoningBaseURL: String
     let reasoningChatModel: String
+    let chatAPIKeyConfigured: Bool
+    let embeddingAPIKeyConfigured: Bool
     let reasoningAPIKeyConfigured: Bool
     let retentionDays: Int
 }
@@ -100,6 +104,33 @@ final class TydoCLIClient {
         } else {
             self.executableURL = Bundle.main.bundleURL
                 .appendingPathComponent("Contents/Helpers/tydo")
+        }
+    }
+
+    /// Where an existing `tydo` already lives, if one does. Raycast and the
+    /// Claude skill look here, so an occupied path usually means Homebrew got
+    /// there first and overwriting it would leave two versions on one store.
+    static let commandLinkURL = URL(fileURLWithPath: "/usr/local/bin/tydo")
+
+    static var conflictingInstallation: URL? {
+        [commandLinkURL, URL(fileURLWithPath: "/opt/homebrew/bin/tydo")]
+            .first { FileManager.default.fileExists(atPath: $0.path) }
+    }
+
+    /// Symlinks the bundled helper into /usr/local/bin so the CLI, Raycast and
+    /// the Claude skill all work without a separate Homebrew install. That
+    /// directory is on the default PATH but needs admin rights to write, hence
+    /// the one-time authorization prompt.
+    func installCommandLineTool() throws {
+        let script = """
+            mkdir -p /usr/local/bin && ln -sf '\(executableURL.path)' '\(Self.commandLinkURL.path)'
+            """
+        var error: NSDictionary?
+        NSAppleScript(source: "do shell script \"\(script)\" with administrator privileges")?
+            .executeAndReturnError(&error)
+        if let error {
+            throw CLIError(message: error[NSAppleScript.errorMessage] as? String
+                ?? "Could not create the symlink in /usr/local/bin.")
         }
     }
 
@@ -221,8 +252,10 @@ final class TydoCLIClient {
         baseURL: String,
         chatModel: String,
         embeddingModel: String,
+        embeddingBaseURL: String,
         reasoningBaseURL: String,
         reasoningChatModel: String,
+        chatAPIKey: String?,
         reasoningAPIKey: String?,
         retentionDays: Int
     ) async throws {
@@ -230,10 +263,12 @@ final class TydoCLIClient {
             "baseURL": baseURL,
             "chatModel": chatModel,
             "embeddingModel": embeddingModel,
+            "embeddingBaseURL": embeddingBaseURL,
             "reasoningBaseURL": reasoningBaseURL,
             "reasoningChatModel": reasoningChatModel,
             "retentionDays": retentionDays
         ]
+        if let chatAPIKey, !chatAPIKey.isEmpty { update["chatAPIKey"] = chatAPIKey }
         if let reasoningAPIKey, !reasoningAPIKey.isEmpty { update["reasoningAPIKey"] = reasoningAPIKey }
         config = try await call(
             ["config", "update"],

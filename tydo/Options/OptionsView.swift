@@ -249,12 +249,15 @@ private struct SettingsTab: View {
     @State private var baseURL = ""
     @State private var chatModel = ""
     @State private var embeddingModel = ""
+    @State private var embeddingBaseURL = ""
+    @State private var chatAPIKey = ""
     @State private var reasoningBaseURL = ""
     @State private var reasoningChatModel = ""
     @State private var reasoningAPIKey = ""
     @State private var retentionDays = 30
     @State private var isSaving = false
     @State private var errorMessage: String?
+    @State private var commandLinkNotice: String?
 
     var body: some View {
         Form {
@@ -276,10 +279,20 @@ private struct SettingsTab: View {
                 KeyboardShortcuts.Recorder("Show list:", name: .showList)
                 KeyboardShortcuts.Recorder("Show options:", name: .showOptions)
             }
-            Section("AI provider") {
+            Section("Chat provider") {
                 TextField("Base URL", text: $baseURL)
                 TextField("Chat model", text: $chatModel)
+                SecureField("New API key", text: $chatAPIKey)
+            }
+            Section("Embedding provider") {
                 TextField("Embedding model", text: $embeddingModel)
+                TextField("Base URL", text: $embeddingBaseURL, prompt: Text("Same as chat"))
+                Text("Leave empty to embed on the chat server. OpenRouter and Groq have no "
+                     + "embeddings endpoint, so with those point this at Ollama or LM Studio. "
+                     + "Changing the model changes the vector width and stops existing todos "
+                     + "from matching.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Section("Mastermind reasoning model") {
                 TextField("Base URL", text: $reasoningBaseURL)
@@ -292,6 +305,12 @@ private struct SettingsTab: View {
                     value: $retentionDays,
                     in: 1...365
                 )
+            }
+            Section("Command line") {
+                Button("Install \'tydo\' command line tool", action: installCommandLineTool)
+                if let commandLinkNotice {
+                    Text(commandLinkNotice).font(.caption).foregroundStyle(.secondary)
+                }
             }
             Button(isSaving ? "Saving..." : "Save Settings", action: save)
                 .disabled(isSaving)
@@ -311,10 +330,25 @@ private struct SettingsTab: View {
             baseURL = config.baseURL
             chatModel = config.chatModel
             embeddingModel = config.embeddingModel
+            embeddingBaseURL = config.embeddingBaseURL
             reasoningBaseURL = config.reasoningBaseURL
             reasoningChatModel = config.reasoningChatModel
             retentionDays = config.retentionDays
         } catch { errorMessage = error.localizedDescription }
+    }
+
+    private func installCommandLineTool() {
+        // Two CLIs of different versions against one store is the likeliest way
+        // to corrupt it, so never overwrite an existing install silently.
+        if let existing = TydoCLIClient.conflictingInstallation {
+            commandLinkNotice = "\(existing.path) already exists. Remove it first "
+                + "(or keep using it) — two versions sharing one store is not supported."
+            return
+        }
+        do {
+            try client.installCommandLineTool()
+            commandLinkNotice = "Linked into \(TydoCLIClient.commandLinkURL.path)."
+        } catch { commandLinkNotice = error.localizedDescription }
     }
 
     private func save() {
@@ -327,11 +361,14 @@ private struct SettingsTab: View {
                     baseURL: baseURL,
                     chatModel: chatModel,
                     embeddingModel: embeddingModel,
+                    embeddingBaseURL: embeddingBaseURL,
                     reasoningBaseURL: reasoningBaseURL,
                     reasoningChatModel: reasoningChatModel,
+                    chatAPIKey: chatAPIKey.isEmpty ? nil : chatAPIKey,
                     reasoningAPIKey: reasoningAPIKey.isEmpty ? nil : reasoningAPIKey,
                     retentionDays: retentionDays
                 )
+                chatAPIKey = ""
                 reasoningAPIKey = ""
             } catch { errorMessage = error.localizedDescription }
         }
