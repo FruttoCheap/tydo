@@ -4,6 +4,7 @@ DerivedData/
 node_modules/
 .DS_Store
 .codegraph/
+.cursor/
 *.xcuserstate
 xcuserdata/
 dist/
