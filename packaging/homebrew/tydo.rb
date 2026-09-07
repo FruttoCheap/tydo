@@ -4,7 +4,7 @@ class Tydo < Formula
   desc "Local-first task manager CLI with pluggable LLM providers"
   homepage "https://github.com/FruttoCheap/tydo"
   url "https://github.com/FruttoCheap/tydo/releases/download/v1.2.0/tydo-1.2.0-macos-universal.tar.gz"
-  sha256 "REPLACE_WITH_THE_SHA256_PRINTED_BY_release-cli.sh"
+  sha256 "b8f87dfd4c0c9ec5449faf27ee840d617eeff0be7acca2121ab939ca5fc6d0f1"
   license "MIT"
 
   # AppKit, SwiftData and PDFKit — macOS only, and Sonoma is the floor.
